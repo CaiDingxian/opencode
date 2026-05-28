@@ -1581,6 +1581,61 @@ it.instance("Google Vertex: uses REP endpoint for Claude continental multi-regio
   }),
 )
 
+it.instance(
+  "model cache_control can be enabled via config",
+  Effect.gen(function* () {
+    yield* set("ANTHROPIC_API_KEY", "test-api-key")
+    const providers = yield* list
+    const model = providers[ProviderID.anthropic].models["claude-sonnet-4-20250514"]
+    expect(model.cache_control).toBe(true)
+    expect(model.name).toBeDefined()
+    expect(model.limit.context).toBeGreaterThan(0)
+  }),
+  {
+    config: {
+      provider: {
+        anthropic: {
+          models: {
+            "claude-sonnet-4-20250514": {
+              cache_control: true,
+            },
+          },
+        },
+      },
+    },
+  },
+)
+
+it.instance(
+  "disabled key is stripped from variant config",
+  Effect.gen(function* () {
+    yield* set("ANTHROPIC_API_KEY", "test-api-key")
+    const providers = yield* list
+    const model = providers[ProviderID.anthropic].models["claude-sonnet-4-20250514"]
+    expect(model.variants!["max"]).toBeDefined()
+    expect(model.variants!["max"].disabled).toBeUndefined()
+    expect(model.variants!["max"].customField).toBe("test")
+  }),
+  {
+    config: {
+      provider: {
+        anthropic: {
+          models: {
+            "claude-sonnet-4-20250514": {
+              variants: {
+                max: {
+                  disabled: false,
+                  customField: "test",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+)
+
 it.instance("Google Vertex Anthropic: uses REP endpoint for continental multi-regions", () =>
   Effect.gen(function* () {
     yield* set("GOOGLE_CLOUD_PROJECT", "test-project")

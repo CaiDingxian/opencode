@@ -2305,6 +2305,95 @@ describe("ProviderTransform.message - cache control on gateway", () => {
       },
     })
   })
+
+  test("openai-compatible applies cache control when model enables it", () => {
+    const model = createModel({
+      providerID: "alibaba-cn",
+      api: {
+        id: "qwen3.6-plus",
+        url: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        npm: "@ai-sdk/openai-compatible",
+      },
+      id: "alibaba-cn/qwen3.6-plus",
+      cache_control: true,
+    })
+    const msgs = [
+      {
+        role: "system",
+        content: "You are a helpful assistant",
+      },
+      {
+        role: "user",
+        content: "Hello",
+      },
+    ] as any[]
+
+    const result = ProviderTransform.message(msgs, model, {}) as any[]
+
+    expect(result[0].providerOptions?.openaiCompatible).toEqual({
+      cache_control: {
+        type: "ephemeral",
+      },
+    })
+  })
+
+  test("openai-compatible applies cache control at message level for assistant text", () => {
+    const model = createModel({
+      providerID: "alibaba-cn",
+      api: {
+        id: "qwen3.6-plus",
+        url: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        npm: "@ai-sdk/openai-compatible",
+      },
+      id: "alibaba-cn/qwen3.6-plus",
+      cache_control: true,
+    })
+    const msgs = [
+      {
+        role: "user",
+        content: "Hello",
+      },
+      {
+        role: "assistant",
+        content: [{ type: "text", text: "Hi" }],
+      },
+    ] as any[]
+
+    const result = ProviderTransform.message(msgs, model, {}) as any[]
+
+    expect(result[1].providerOptions?.openaiCompatible).toEqual({
+      cache_control: {
+        type: "ephemeral",
+      },
+    })
+    expect(result[1].content[0].providerOptions).toBeUndefined()
+  })
+
+  test("openai-compatible does not apply cache control by default", () => {
+    const model = createModel({
+      providerID: "alibaba-cn",
+      api: {
+        id: "qwen3.6-plus",
+        url: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        npm: "@ai-sdk/openai-compatible",
+      },
+      id: "alibaba-cn/qwen3.6-plus",
+    })
+    const msgs = [
+      {
+        role: "system",
+        content: "You are a helpful assistant",
+      },
+      {
+        role: "user",
+        content: "Hello",
+      },
+    ] as any[]
+
+    const result = ProviderTransform.message(msgs, model, {}) as any[]
+
+    expect(result[0].providerOptions).toBeUndefined()
+  })
 })
 
 describe("ProviderTransform.variants", () => {
