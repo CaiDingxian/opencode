@@ -472,6 +472,14 @@ function custom(dep: CustomDep): Record<string, CustomLoader> {
           },
         },
       }),
+    alibaba: () =>
+      Effect.succeed({
+        autoload: false,
+        // 注册自定义 model loader，将 model.options (如 enableThinking/thinkingBudget) 透传给 sdk
+        async getModel(sdk: any, modelID: string, options?: Record<string, any>) {
+          return sdk.languageModel(modelID, options)
+        },
+      }),
     "google-vertex": Effect.fnUntraced(function* (provider: Info) {
       const env = yield* dep.env()
       // models.dev advertises GOOGLE_VERTEX_PROJECT for Vertex; keep the wider
