@@ -1025,7 +1025,7 @@ export const Model = Schema.Struct({
   cost: ProviderCost,
   limit: ProviderLimit,
   status: ModelStatus,
-  cache_control: optionalOmitUndefined(Schema.Boolean),
+  cache_control: optional(Schema.Boolean),
   options: Schema.Record(Schema.String, Schema.Any),
   headers: Schema.Record(Schema.String, Schema.String),
   release_date: Schema.String,
